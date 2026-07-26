@@ -197,11 +197,28 @@ export default function InsightsPage() {
 
   const handleCSVExport = () => {
     if (!cycles.length) return
+    const currentDate = new Date().toISOString().split('T')[0]
+    const pcodScore = pcodRisk?.score !== undefined ? `${pcodRisk.score}/100` : 'N/A'
+    const pcodTier = pcodRisk?.tier ? pcodRisk.tier : 'N/A'
+
+    const metadata = [
+      '# HerCycle AI - Women\'s Health & Cycle Tracker',
+      '# Website: https://github.com/khushi897920-lang/hercycle-ai',
+      `# Exported On: ${currentDate}`,
+      '#',
+      '# CYCLE STATISTICS:',
+      `# Total Cycles Logged: ${totalCycles}`,
+      `# Average Cycle Length: ${avgCycle} days`,
+      `# PCOD Risk Score: ${pcodScore} (${pcodTier})`,
+      '#\n'
+    ].join('\n')
+
     const header = 'start_date,end_date,cycle_length'
     const rows = cycles.map(c =>
       `${toYMD(c.start_date) || ''},${toYMD(c.end_date) || ''},${c.cycle_length || ''}`
     )
-    const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv' })
+    const csvContent = metadata + [header, ...rows].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
